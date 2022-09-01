@@ -12,7 +12,7 @@ import { PoDynamicFormField, PoTableColumn } from '@po-ui/ng-components';
 export class LembreteService {
 
   constructor(private httpClient: HttpClient) { }
-  url = 'http://52.1.103.250:4444/lembretes';
+  url = 'https://qcpadrao.mazzafc.tech/lembretes';
 
   getLembretes(page:number = 1): Observable<Lembretes> {
     return this.httpClient
