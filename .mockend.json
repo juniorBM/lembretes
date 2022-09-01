@@ -1,9 +1,9 @@
 {
   "Lembrete": {
-      "id": {"string": ""},
-      "titulo": {"string": ""},
-      "prioridade": {"string": ""},
-      "conteudo":{"string": ""},
+      "id": {"string": {}},
+      "titulo": {"string": {}},
+      "prioridade": {"string": {}},
+      "conteudo":{"string": {}},
       "acao": {
         "string": [
           "acao"
