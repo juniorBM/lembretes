@@ -23,9 +23,13 @@ export class LembreteComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.isHideLoading = false;
     this.lembreteService.getLembretes().subscribe({
       next: (res) => {
+        console.log('as');
+
         this.lembretes = res;
+        this.isHideLoading = true;
       },
     });
   }
@@ -35,6 +39,7 @@ export class LembreteComponent implements OnInit {
   @ViewChild('formCriar', { static: true }) formCriar!: NgForm;
   @ViewChild('formEditar', { static: true }) formEditar!: NgForm;
 
+  isHideLoading = true;
   lembrete: Lembrete = { id: '', titulo: '', prioridade: '', conteudo: '' };
   lembretes: Lembretes = [];
   page: number = 1;
@@ -52,20 +57,24 @@ export class LembreteComponent implements OnInit {
       value = value.normalize('NFD').replace(/[\u0300-\u036f]/g, "");
       if (value.length >= 3) {
         setTimeout(() => {
+          this.isHideLoading = false;
           this.lembreteService.getLembretesConteudo(value).subscribe({
             next: (res) => {
               if (res.length) {
                 this.semLembretes = true;
               }
               this.lembretes = res;
+              this.isHideLoading = true;
             },
           });
         }, 300);
       } else if (!value.length) {
+        this.isHideLoading = false;
         this.lembreteService.getLembretes().subscribe({
           next: (res) => {
             this.lembretes = res;
             this.semLembretes = false;
+            this.isHideLoading = true;
           },
         });
       }
@@ -87,12 +96,14 @@ export class LembreteComponent implements OnInit {
     let form = this.formCriar.form;
 
     if (form.valid) {
+      this.isHideLoading = false;
       this.lembrete = form.value;
       this.lembreteService.addLembrete(this.lembrete).subscribe((res) => {
         res.prioridade = PrioridadeReceber[res.prioridade as keyof typeof PrioridadeReceber];
         this.lembretes.unshift(res);
         this.poNotification.success('Lembrete Salvo com Sucesso!');
         this.modalCriar.close();
+        this.isHideLoading = true;
       });
     }
   }
@@ -111,6 +122,7 @@ export class LembreteComponent implements OnInit {
 
     if (form.valid) {
       this.lembrete = form.value;
+      this.isHideLoading = false;
 
       this.lembreteService.atualizarLembrete(this.lembrete).subscribe((res) => {
         res.prioridade =
@@ -119,11 +131,13 @@ export class LembreteComponent implements OnInit {
         this.lembretes[itemIndex] = res;
         this.poNotification.success('Lembrete Atualizado com Sucesso!');
         this.modalEditar.close();
+        this.isHideLoading = true;
       });
     }
   }
 
   verMais() {
+    this.isHideLoading = false;
     this.lembreteService.getLembretes((this.page += 1)).subscribe({
       next: (res) => {
         if (!res.length) {
@@ -131,6 +145,7 @@ export class LembreteComponent implements OnInit {
         }
         let lembretes = [...this.lembretes, ...res];
         this.lembretes = lembretes;
+        this.isHideLoading = true;
       },
     });
   }

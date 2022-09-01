@@ -12,10 +12,11 @@ import { PoDynamicFormField, PoTableColumn } from '@po-ui/ng-components';
 export class LembreteService {
 
   constructor(private httpClient: HttpClient) { }
+  url = 'http://52.1.103.250:4444/lembretes';
 
   getLembretes(page:number = 1): Observable<Lembretes> {
     return this.httpClient
-      .get<Lembretes>('http://localhost:3000/lembretes?_page='+page+'&_limit=10')
+      .get<Lembretes>(this.url+'?_page='+page+'&_limit=10&_sort=id&_order=desc')
       .pipe(
         map((res) => {
           res.map((item) => {
@@ -32,7 +33,7 @@ export class LembreteService {
   getLembretesConteudo(q: string): Observable<Lembretes> {
 
     return this.httpClient
-      .get<Lembretes>('http://localhost:3000/lembretes?q='+q)
+      .get<Lembretes>(this.url+'?q='+q+'&_sort=id&_order=desc')
       .pipe(
         map((res) => {
           res.map((item) => {
@@ -49,18 +50,17 @@ export class LembreteService {
   addLembrete(lembrete: Lembrete) {
     lembrete.acao = ['editar'];
     return this.httpClient
-      .post<Lembrete>('http://localhost:3000/lembretes', lembrete);
+      .post<Lembrete>(this.url, lembrete);
   }
 
   atualizarLembrete(lembrete: Lembrete) {
     console.log(lembrete);
     lembrete.acao = ['editar'];
     return this.httpClient
-      .put<Lembrete>('http://localhost:3000/lembretes/'+lembrete.id, lembrete);
+      .put<Lembrete>(this.url+'/'+lembrete.id, lembrete);
   }
 
   getCamposForm(desabilitarPrioridade: boolean) {
-    console.log(desabilitarPrioridade);
 
     let fields: Array<PoDynamicFormField> = [
       {
