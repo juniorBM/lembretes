@@ -42,6 +42,10 @@ export class LembreteComponent implements OnInit {
   @ViewChild('formCriar', { static: true }) formCriar!: NgForm;
   @ViewChild('formEditar', { static: true }) formEditar!: NgForm;
 
+  poNotificationCustom: PoNotification = {
+    message: 'Verifique se o Título ou Conteúdo estão preenchidos corretamente!',
+    orientation: 1
+  };
   isHideLoading = true;
   lembrete: Lembrete = { id: '', titulo: '', prioridade: '', conteudo: '' };
   lembretes: Lembretes = [];
@@ -99,7 +103,7 @@ export class LembreteComponent implements OnInit {
     let conteudo = form.value.conteudo.trim().length;
 
     if (!titulo || !conteudo) {
-      this.poNotification.error('Verifique se o Título ou Conteúdo estão preenchidos corretamente!');
+      this.poNotification.error(this.poNotificationCustom);
       return;
     }
 
@@ -138,7 +142,8 @@ export class LembreteComponent implements OnInit {
     let conteudo = form.value.conteudo.trim().length;
 
     if (!titulo || !conteudo) {
-      this.poNotification.error('Verifique se o Título ou Conteúdo estão preenchidos corretamente!', );
+
+      this.poNotification.error(this.poNotificationCustom);
       return;
     }
 
