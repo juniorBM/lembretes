@@ -1,7 +1,7 @@
 <h1 style="margin-top: 15px;">Lembretes</h1>
 <po-container [p-no-border]="true" class="po-page-list-operations">
   <div class="header-table">
-    <po-input p-placeholder="Pesquise por qualquer campo" (p-change-model)="filtro()" [formControl]="conteudoInput"
+    <po-input p-placeholder="Pesquisar..." (p-change-model)="filtro()" [formControl]="conteudoInput"
        class="po-lg-6"></po-input>
     <div class="">
       <po-button (p-click)="openModal()" p-label="Adicionar"> </po-button>
