@@ -47,13 +47,13 @@ export class LembreteService {
       );
   }
 
-  addLembrete(lembrete: Lembrete) {
+  addLembrete(lembrete: Lembrete): Observable<Lembrete>  {
     lembrete.acao = ['editar'];
     return this.httpClient
       .post<Lembrete>(this.url, lembrete);
   }
 
-  atualizarLembrete(lembrete: Lembrete) {
+  atualizarLembrete(lembrete: Lembrete): Observable<Lembrete>  {
     console.log(lembrete);
     lembrete.acao = ['editar'];
     return this.httpClient

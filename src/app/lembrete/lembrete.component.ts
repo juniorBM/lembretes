@@ -15,7 +15,6 @@ import { PoNotificationService } from '@po-ui/ng-components';
   templateUrl: './lembrete.component.html',
   styleUrls: ['./lembrete.component.scss'],
 })
-
 export class LembreteComponent implements OnInit {
   constructor(
     private lembreteService: LembreteService,
@@ -29,6 +28,9 @@ export class LembreteComponent implements OnInit {
         console.log('as');
 
         this.lembretes = res;
+        this.isHideLoading = true;
+      },
+      error: (err) => {
         this.isHideLoading = true;
       },
     });
@@ -54,7 +56,7 @@ export class LembreteComponent implements OnInit {
 
   filtro() {
     this.conteudoInput.valueChanges.subscribe((value) => {
-      value = value.normalize('NFD').replace(/[\u0300-\u036f]/g, "");
+      value = value.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
       if (value.length >= 3) {
         setTimeout(() => {
           this.isHideLoading = false;
@@ -66,6 +68,9 @@ export class LembreteComponent implements OnInit {
               this.lembretes = res;
               this.isHideLoading = true;
             },
+            error: (err) => {
+              this.isHideLoading = true;
+            },
           });
         }, 300);
       } else if (!value.length) {
@@ -74,6 +79,9 @@ export class LembreteComponent implements OnInit {
           next: (res) => {
             this.lembretes = res;
             this.semLembretes = false;
+            this.isHideLoading = true;
+          },
+          error: (err) => {
             this.isHideLoading = true;
           },
         });
@@ -98,12 +106,18 @@ export class LembreteComponent implements OnInit {
     if (form.valid) {
       this.isHideLoading = false;
       this.lembrete = form.value;
-      this.lembreteService.addLembrete(this.lembrete).subscribe((res) => {
-        res.prioridade = PrioridadeReceber[res.prioridade as keyof typeof PrioridadeReceber];
-        this.lembretes.unshift(res);
-        this.poNotification.success('Lembrete Salvo com Sucesso!');
-        this.modalCriar.close();
-        this.isHideLoading = true;
+      this.lembreteService.addLembrete(this.lembrete).subscribe({
+        next: (res) => {
+          res.prioridade =
+            PrioridadeReceber[res.prioridade as keyof typeof PrioridadeReceber];
+          this.lembretes.unshift(res);
+          this.poNotification.success('Lembrete Salvo com Sucesso!');
+          this.modalCriar.close();
+          this.isHideLoading = true;
+        },
+        error: (err) => {
+          this.isHideLoading = true;
+        },
       });
     }
   }
@@ -124,14 +138,19 @@ export class LembreteComponent implements OnInit {
       this.lembrete = form.value;
       this.isHideLoading = false;
 
-      this.lembreteService.atualizarLembrete(this.lembrete).subscribe((res) => {
-        res.prioridade =
-          PrioridadeReceber[res.prioridade as keyof typeof PrioridadeReceber];
-        let itemIndex = this.lembretes.findIndex((item) => item.id == res.id);
-        this.lembretes[itemIndex] = res;
-        this.poNotification.success('Lembrete Atualizado com Sucesso!');
-        this.modalEditar.close();
-        this.isHideLoading = true;
+      this.lembreteService.atualizarLembrete(this.lembrete).subscribe({
+        next: (res) => {
+          res.prioridade =
+            PrioridadeReceber[res.prioridade as keyof typeof PrioridadeReceber];
+          let itemIndex = this.lembretes.findIndex((item) => item.id == res.id);
+          this.lembretes[itemIndex] = res;
+          this.poNotification.success('Lembrete Atualizado com Sucesso!');
+          this.modalEditar.close();
+          this.isHideLoading = true;
+        },
+        error: (err) => {
+          this.isHideLoading = true;
+        },
       });
     }
   }
@@ -145,6 +164,9 @@ export class LembreteComponent implements OnInit {
         }
         let lembretes = [...this.lembretes, ...res];
         this.lembretes = lembretes;
+        this.isHideLoading = true;
+      },
+      error: (err) => {
         this.isHideLoading = true;
       },
     });
