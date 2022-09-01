@@ -10,13 +10,22 @@
   </div>
 </po-container>
 
-<po-table [p-items]="lembretes" [p-sort]="true" [p-columns]="columns"> </po-table>
+<po-table
+  (p-show-more)="verMais()"
+  [p-items]="lembretes"
+  [p-sort]="true"
+  [p-columns]="columns"
+  [p-show-more-disabled]="semLembretes"
+>
 
-<po-modal #modal p-title="PO Modal">
+</po-table>
+
+<!-- <app-modal-criar></app-modal-criar> -->
+<po-modal #modalCriar p-title="Criar Lembrete">
   <po-dynamic-form
-    #dynamicForm
+    #formCriar
     p-auto-focus="name"
-    [p-fields]="fields"
+    [p-fields]="fieldsCreate"
     [p-validate-fields]="validateFields"
     [p-value]="lembrete"
 
@@ -26,8 +35,31 @@
 
   <po-modal-footer>
     <po-button [p-danger]="true" (p-click)="closeModal()" p-label="Cancelar"> </po-button>
-    <po-button p-label="Salvar" [p-disabled]="dynamicForm?.form?.invalid ? true : false"
+    <po-button p-label="Salvar" [p-disabled]="formCriar?.form?.invalid ? true : false"
       (p-click)="poNotification.success('Data saved successfully!'); salvarLembrete();">
+    </po-button>
+
+  </po-modal-footer>
+
+
+</po-modal>
+
+<po-modal #modalEditar p-title="Atulizar Lembrete">
+  <po-dynamic-form
+    #formEditar
+    p-auto-focus="name"
+    [p-fields]="fieldsEdit"
+    [p-validate-fields]="validateFields"
+    [p-value]="lembrete"
+
+
+  >
+  </po-dynamic-form>
+
+  <po-modal-footer>
+    <po-button [p-danger]="true" (p-click)="modalEditar.close()" p-label="Cancelar"> </po-button>
+    <po-button p-label="Salvar" [p-disabled]="formEditar?.form?.invalid ? true : false"
+      (p-click)="atualizarLembrete();">
     </po-button>
 
   </po-modal-footer>

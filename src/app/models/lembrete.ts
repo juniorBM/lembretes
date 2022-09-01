@@ -4,6 +4,7 @@ export interface Lembrete {
   titulo: string;
   conteudo: string;
   prioridade: string;
+  acao?: Array<String>;
 }
 export interface LembreteApi {
   payload: Lembretes;
@@ -19,5 +20,5 @@ export enum PrioridadeReceber {
 export enum PrioridadeEnviar {
   'Baixa' = 'baixa',
   'Média' = 'media',
-  'Alta' = 'baixa'
+  'Alta' = 'alta'
 };

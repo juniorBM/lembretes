@@ -16,7 +16,7 @@ import { ReactiveFormsModule } from '@angular/forms';
 @NgModule({
   declarations: [
     AppComponent,
-    LembreteComponent
+    LembreteComponent,
   ],
   imports: [
     BrowserModule,

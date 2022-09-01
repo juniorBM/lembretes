@@ -37,91 +37,6 @@ import { PoFieldModule } from '@po-ui/ng-components';
   styleUrls: ['./lembrete.component.scss'],
 })
 export class LembreteComponent implements OnInit {
-  @ViewChild(PoModalComponent, { static: true }) poModal!: PoModalComponent;
-  @ViewChild('dynamicForm', { static: true }) form!: NgForm;
-
-  lembrete: Lembrete = { titulo: '', prioridade: '', conteudo: '' };
-  isEdit:boolean = false;
-
-  validateFields: Array<string> = ['titulo', 'conteudo'];
-
-  fields: Array<PoDynamicFormField> = [
-    {
-      property: 'titulo',
-      required: true,
-      minLength: 4,
-      maxLength: 50,
-      gridColumns: 12,
-      gridSmColumns: 12,
-      order: 1,
-      placeholder: '',
-      errorMessage: 'Mínimo de 4 caracteres',
-    },
-    {
-      property: 'prioridade',
-      required: true,
-      gridColumns: 6,
-      // disabled: true,
-      options: [
-        { label: 'Baixa', value: 'baixa' },
-        { label: 'Média', value: 'media' },
-        { label: 'Alta', value: 'alta' },
-      ],
-    },
-    {
-      required: true,
-      property: 'conteudo',
-      label: 'Conteúdo',
-      gridColumns: 12,
-      gridSmColumns: 12,
-      rows: 5,
-      placeholder: '',
-    },
-  ];
-
-  readonly columns: Array<PoTableColumn> = [
-    {
-      property: 'titulo',
-      label: 'Título',
-    },
-    { property: 'prioridade', label: 'prioriade' },
-    { property: 'conteudo', label: 'Conteúdo' },
-    {
-      property: 'acao',
-      label: 'Ações',
-      type: 'icon',
-      sortable: false,
-      icons: [
-        {
-          action: this.edit.bind(this),
-          color: 'color-08',
-          icon: 'po-icon-edit',
-          tooltip: 'Editar Lembrete',
-          value: 'editar'
-        },
-      ]
-    }
-
-  ];
-
-  onChangeFields(changedValue: PoDynamicFormFieldChanged) {}
-
-  onLoadFields(a:any): PoDynamicFormLoad {
-    console.log(this.isEdit);
-
-    let doc = {
-      fields: [
-        { property: 'prioridade', disabled: this.isEdit}
-      ],
-      // focus: 'titulo'
-    };
-
-    return doc;
-
-  }
-
-  lembretes: Lembretes = [];
-
   constructor(
     private store: Store<{ lembretes: Lembrete[] }>,
     private lembreteService: LembreteService,
@@ -138,54 +53,37 @@ export class LembreteComponent implements OnInit {
     });
   }
 
+  @ViewChild('modalCriar', { static: true }) modalCriar!: PoModalComponent;
+  @ViewChild('modalEditar', { static: true }) modalEditar!: PoModalComponent;
+  @ViewChild('formCriar', { static: true }) formCriar!: NgForm;
+  @ViewChild('formEditar', { static: true }) formEditar!: NgForm;
+
+  lembrete: Lembrete = { titulo: '', prioridade: '', conteudo: '' };
+  lembretes: Lembretes = [];
+  page: number = 1;
+  semLembretes: boolean = false;
+
+  validateFields: Array<string> = ['titulo', 'conteudo'];
+
+  fieldsCreate = this.lembreteService.getCamposForm(false);
+  fieldsEdit = this.lembreteService.getCamposForm(true);
+  columns = this.lembreteService.getCamposTabela(this.edit.bind(this));
+
+
+
   openModal() {
     this.lembrete.titulo = '';
     this.lembrete.prioridade = '';
     this.lembrete.conteudo = '';
-    this.poModal.open();
-    this.fields = [
-      {
-        property: 'titulo',
-        required: true,
-        minLength: 4,
-        maxLength: 50,
-        gridColumns: 12,
-        gridSmColumns: 12,
-        order: 1,
-        placeholder: '',
-        errorMessage: 'Mínimo de 4 caracteres',
-      },
-      {
-        property: 'prioridade',
-        required: true,
-        gridColumns: 6,
-        disabled: false,
-        options: [
-          { label: 'Baixa', value: 'baixa' },
-          { label: 'Média', value: 'media' },
-          { label: 'Alta', value: 'alta' },
-        ],
-      },
-      {
-        required: true,
-        property: 'conteudo',
-        label: 'Conteúdo',
-        gridColumns: 12,
-        gridSmColumns: 12,
-        rows: 5,
-        placeholder: '',
-      },
-    ];
+    this.modalCriar.open();
   }
 
   closeModal() {
-    this.isEdit = false;
-    this.poModal.close();
-    console.log('asd');
+    this.modalCriar.close();
   }
 
   salvarLembrete() {
-    let form = this.form.form;
+    let form = this.formCriar.form;
 
     if (form.valid) {
       this.lembrete = form.value;
@@ -196,45 +94,36 @@ export class LembreteComponent implements OnInit {
   }
 
   edit(row: any) {
-    this.fields = [
-      {
-        property: 'titulo',
-        required: true,
-        minLength: 4,
-        maxLength: 50,
-        gridColumns: 12,
-        gridSmColumns: 12,
-        order: 1,
-        placeholder: '',
-        errorMessage: 'Mínimo de 4 caracteres',
-      },
-      {
-        property: 'prioridade',
-        required: true,
-        gridColumns: 6,
-        disabled: true,
-        options: [
-          { label: 'Baixa', value: 'baixa' },
-          { label: 'Média', value: 'media' },
-          { label: 'Alta', value: 'alta' },
-        ],
-      },
-      {
-        required: true,
-        property: 'conteudo',
-        label: 'Conteúdo',
-        gridColumns: 12,
-        gridSmColumns: 12,
-        rows: 5,
-        placeholder: '',
-      },
-    ];
     this.lembrete.titulo = row.titulo;
     this.lembrete.prioridade = PrioridadeEnviar[row.prioridade as keyof typeof PrioridadeEnviar];
     this.lembrete.conteudo = row.conteudo;
-    this.isEdit = true;
-    this.onLoadFields(row);
-    this.poModal.open();
+    this.modalEditar.open();
+  }
+
+  atualizarLembrete() {
+    let form = this.formEditar.form;
+
+    if (form.valid) {
+      this.lembrete = form.value;
+
+      // this.lembreteService.addLembrete(this.lembrete).subscribe((res) => {
+      //   // this.store.dispatch(addLembrete({ payload: res }));
+      // });
+    }
+  }
+
+  verMais() {
+
+    this.lembreteService.getLembretes(this.page+=1).subscribe({
+      next: (res) => {
+        console.log(res);
+        if (!res.length) {
+          this.semLembretes = true;
+        }
+        let lembretes = [...this.lembretes, ...res];
+        this.lembretes = lembretes;
+      },
+    });
   }
 
 
