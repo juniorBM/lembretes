@@ -2,7 +2,7 @@ import { Lembrete, LembreteApi, Lembretes, PrioridadeReceber } from './../../mod
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { catchError, map, pluck, tap } from 'rxjs/operators';
+import { catchError, map } from 'rxjs/operators';
 import { PoDynamicFormField, PoTableColumn } from '@po-ui/ng-components';
 
 
@@ -14,10 +14,25 @@ export class LembreteService {
   constructor(private httpClient: HttpClient) { }
 
   getLembretes(page:number = 1): Observable<Lembretes> {
-    console.log(page);
+    return this.httpClient
+      .get<Lembretes>('http://localhost:3000/lembretes?_page='+page+'&_limit=10')
+      .pipe(
+        map((res) => {
+          res.map((item) => {
+            item.prioridade = PrioridadeReceber[item.prioridade as keyof typeof PrioridadeReceber];
+          });
+          return res;
+        }),
+        catchError(err => {
+          throw 'Detalhes do erro ' + err;
+        })
+      );
+  }
+
+  getLembretesConteudo(q: string): Observable<Lembretes> {
 
     return this.httpClient
-      .get<Lembretes>('http://localhost:3000/lembretes?_page='+page+'&_limit=1')
+      .get<Lembretes>('http://localhost:3000/lembretes?q='+q)
       .pipe(
         map((res) => {
           res.map((item) => {
@@ -32,14 +47,30 @@ export class LembreteService {
   }
 
   addLembrete(lembrete: Lembrete) {
-    console.log(lembrete);
     lembrete.acao = ['editar'];
     return this.httpClient
       .post<Lembrete>('http://localhost:3000/lembretes', lembrete);
   }
 
+  atualizarLembrete(lembrete: Lembrete) {
+    console.log(lembrete);
+    lembrete.acao = ['editar'];
+    return this.httpClient
+      .put<Lembrete>('http://localhost:3000/lembretes/'+lembrete.id, lembrete);
+  }
+
   getCamposForm(desabilitarPrioridade: boolean) {
+    console.log(desabilitarPrioridade);
+
     let fields: Array<PoDynamicFormField> = [
+      {
+        property: 'id',
+        required: true,
+        order: 1,
+        placeholder: '',
+        visible: desabilitarPrioridade,
+        disabled: desabilitarPrioridade,
+      },
       {
         property: 'titulo',
         required: true,
@@ -82,7 +113,7 @@ export class LembreteService {
         property: 'titulo',
         label: 'Título',
       },
-      { property: 'prioridade', label: 'prioriade' },
+      { property: 'prioridade', label: 'Prioriade' },
       { property: 'conteudo', label: 'Conteúdo' },
       {
         property: 'acao',

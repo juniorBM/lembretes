@@ -1,6 +1,7 @@
 export interface Lembretes extends Array<Lembrete>{}
 
 export interface Lembrete {
+  id?: string;
   titulo: string;
   conteudo: string;
   prioridade: string;

@@ -1,54 +1,31 @@
 import {
-  setAllLembretes,
-  addLembrete,
-} from './../store/actions/lembrete.actions';
-import { Lembrete, Lembretes, PrioridadeReceber, PrioridadeEnviar } from './../models/lembrete';
+  Lembrete,
+  Lembretes,
+  PrioridadeReceber,
+  PrioridadeEnviar,
+} from './../models/lembrete';
 import { Component, OnInit, ViewChild } from '@angular/core';
-import {
-  FormGroup,
-  FormControl,
-  NgForm,
-  FormBuilder,
-  Validators,
-} from '@angular/forms';
-import {
-  PoPageDynamicTableComponent,
-  PoPageDynamicTableCustomAction,
-  PoPageDynamicTableOptions,
-} from '@po-ui/ng-templates';
-import { select, Store } from '@ngrx/store';
-import { map, Observable } from 'rxjs';
 import { LembreteService } from '../services/lembrete/lembrete.service';
-import {
-  PoComboOption,
-  PoDynamicFormField,
-  PoDynamicFormFieldChanged,
-  PoDynamicFormLoad,
-  PoDynamicFormValidation,
-  PoModalComponent,
-  PoNotificationService,
-  PoTableColumn,
-} from '@po-ui/ng-components';
-import { PoFieldModule } from '@po-ui/ng-components';
+import { PoModalComponent } from '@po-ui/ng-components';
+import { FormControl, NgForm } from '@angular/forms';
+import { PoNotificationService } from '@po-ui/ng-components';
 
 @Component({
   selector: 'app-lembrete',
   templateUrl: './lembrete.component.html',
   styleUrls: ['./lembrete.component.scss'],
 })
+
 export class LembreteComponent implements OnInit {
   constructor(
-    private store: Store<{ lembretes: Lembrete[] }>,
     private lembreteService: LembreteService,
-    private fb: FormBuilder,
-    public poNotification: PoNotificationService
+    private poNotification: PoNotificationService
   ) {}
 
   ngOnInit(): void {
     this.lembreteService.getLembretes().subscribe({
       next: (res) => {
         this.lembretes = res;
-        // this.store.dispatch(setAllLembretes({ payload: res }));
       },
     });
   }
@@ -58,10 +35,11 @@ export class LembreteComponent implements OnInit {
   @ViewChild('formCriar', { static: true }) formCriar!: NgForm;
   @ViewChild('formEditar', { static: true }) formEditar!: NgForm;
 
-  lembrete: Lembrete = { titulo: '', prioridade: '', conteudo: '' };
+  lembrete: Lembrete = { id: '', titulo: '', prioridade: '', conteudo: '' };
   lembretes: Lembretes = [];
   page: number = 1;
   semLembretes: boolean = false;
+  conteudoInput = new FormControl();
 
   validateFields: Array<string> = ['titulo', 'conteudo'];
 
@@ -69,7 +47,30 @@ export class LembreteComponent implements OnInit {
   fieldsEdit = this.lembreteService.getCamposForm(true);
   columns = this.lembreteService.getCamposTabela(this.edit.bind(this));
 
-
+  filtro() {
+    this.conteudoInput.valueChanges.subscribe((value) => {
+      value = value.normalize('NFD').replace(/[\u0300-\u036f]/g, "");
+      if (value.length >= 3) {
+        setTimeout(() => {
+          this.lembreteService.getLembretesConteudo(value).subscribe({
+            next: (res) => {
+              if (res.length) {
+                this.semLembretes = true;
+              }
+              this.lembretes = res;
+            },
+          });
+        }, 300);
+      } else if (!value.length) {
+        this.lembreteService.getLembretes().subscribe({
+          next: (res) => {
+            this.lembretes = res;
+            this.semLembretes = false;
+          },
+        });
+      }
+    });
+  }
 
   openModal() {
     this.lembrete.titulo = '';
@@ -88,14 +89,19 @@ export class LembreteComponent implements OnInit {
     if (form.valid) {
       this.lembrete = form.value;
       this.lembreteService.addLembrete(this.lembrete).subscribe((res) => {
-        // this.store.dispatch(addLembrete({ payload: res }));
+        res.prioridade = PrioridadeReceber[res.prioridade as keyof typeof PrioridadeReceber];
+        this.lembretes.unshift(res);
+        this.poNotification.success('Lembrete Salvo com Sucesso!');
+        this.modalCriar.close();
       });
     }
   }
 
-  edit(row: any) {
+  edit(row: Lembrete) {
+    this.lembrete.id = row.id;
     this.lembrete.titulo = row.titulo;
-    this.lembrete.prioridade = PrioridadeEnviar[row.prioridade as keyof typeof PrioridadeEnviar];
+    this.lembrete.prioridade =
+      PrioridadeEnviar[row.prioridade as keyof typeof PrioridadeEnviar];
     this.lembrete.conteudo = row.conteudo;
     this.modalEditar.open();
   }
@@ -106,17 +112,20 @@ export class LembreteComponent implements OnInit {
     if (form.valid) {
       this.lembrete = form.value;
 
-      // this.lembreteService.addLembrete(this.lembrete).subscribe((res) => {
-      //   // this.store.dispatch(addLembrete({ payload: res }));
-      // });
+      this.lembreteService.atualizarLembrete(this.lembrete).subscribe((res) => {
+        res.prioridade =
+          PrioridadeReceber[res.prioridade as keyof typeof PrioridadeReceber];
+        let itemIndex = this.lembretes.findIndex((item) => item.id == res.id);
+        this.lembretes[itemIndex] = res;
+        this.poNotification.success('Lembrete Atualizado com Sucesso!');
+        this.modalEditar.close();
+      });
     }
   }
 
   verMais() {
-
-    this.lembreteService.getLembretes(this.page+=1).subscribe({
+    this.lembreteService.getLembretes((this.page += 1)).subscribe({
       next: (res) => {
-        console.log(res);
         if (!res.length) {
           this.semLembretes = true;
         }
@@ -125,6 +134,4 @@ export class LembreteComponent implements OnInit {
       },
     });
   }
-
-
 }

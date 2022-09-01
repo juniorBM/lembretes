@@ -1,9 +1,8 @@
-<!-- <po-table [p-items]="[{ table: 'PO Table', angular: 'PO-UI' }]"> </po-table> -->
-<!-- <po-table [p-items]="[lembretes$ | async]"> </po-table> -->
-
+<h1 style="margin-top: 15px;">Lembretes</h1>
 <po-container [p-no-border]="true" class="po-page-list-operations">
   <div class="header-table">
-    <po-input p-placeholder="Pesquise pelo Conteúdo" class="po-lg-6" name="input"> </po-input>
+    <po-input p-placeholder="Pesquise por qualquer campo" (p-change-model)="filtro()" [formControl]="conteudoInput"
+       class="po-lg-6"></po-input>
     <div class="">
       <po-button (p-click)="openModal()" p-label="Adicionar"> </po-button>
     </div>
@@ -20,7 +19,6 @@
 
 </po-table>
 
-<!-- <app-modal-criar></app-modal-criar> -->
 <po-modal #modalCriar p-title="Criar Lembrete">
   <po-dynamic-form
     #formCriar
@@ -36,7 +34,7 @@
   <po-modal-footer>
     <po-button [p-danger]="true" (p-click)="closeModal()" p-label="Cancelar"> </po-button>
     <po-button p-label="Salvar" [p-disabled]="formCriar?.form?.invalid ? true : false"
-      (p-click)="poNotification.success('Data saved successfully!'); salvarLembrete();">
+      (p-click)="salvarLembrete();">
     </po-button>
 
   </po-modal-footer>
@@ -63,6 +61,5 @@
     </po-button>
 
   </po-modal-footer>
-
 
 </po-modal>

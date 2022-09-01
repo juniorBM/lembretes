@@ -1,47 +1,4 @@
 {
   "lembretes": [
-    {
-      "id": "1",
-      "titulo": "Estudar PHP",
-      "conteudo": "Fazer formações da Alura, e depois conseguir fazer certificação",
-      "prioridade": "baixa",
-      "acao": [
-        "editar"
-      ]
-    },
-    {
-      "id": "2",
-      "titulo": "Entender Gerenciamento de Estado",
-      "conteudo": "Compreender a fundo o NgRx",
-      "prioridade": "alta"
-    },
-    {
-      "id": "3",
-      "titulo": "Estudar TypScript",
-      "conteudo": "Compreender a sixtaxe da linguagem",
-      "prioridade": "alta"
-    },
-    {
-      "id": "4",
-      "titulo": "PO-UI",
-      "conteudo": "Aprender a utilizar os componentes do framework",
-      "prioridade": "media"
-    },
-    {
-      "titulo": "TEEE",
-      "prioridade": "media",
-      "conteudo": "s",
-      "id": "opNZMum"
-    },
-    {
-      "titulo": "jajajaja",
-      "prioridade": "alta",
-      "conteudo": "sss",
-      "acao": [
-        "editar"
-      ],
-      "id": "_ZpMaqI"
-    }
-  ],
-  "teste": []
+  ]
 }
