@@ -1,3 +1,4 @@
+import { debounceTime, distinctUntilChanged, filter, map, switchMap } from 'rxjs/operators';
 import {
   Lembrete,
   Lembretes,
@@ -6,7 +7,7 @@ import {
 } from './../models/lembrete';
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { LembreteService } from '../services/lembrete/lembrete.service';
-import { PoModalComponent } from '@po-ui/ng-components';
+import { PoModalComponent, PoNotification } from '@po-ui/ng-components';
 import { FormControl, NgForm } from '@angular/forms';
 import { PoNotificationService } from '@po-ui/ng-components';
 
@@ -55,38 +56,30 @@ export class LembreteComponent implements OnInit {
   columns = this.lembreteService.getCamposTabela(this.edit.bind(this));
 
   filtro() {
-    this.conteudoInput.valueChanges.subscribe((value) => {
-      value = value.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-      if (value.length >= 3) {
-        setTimeout(() => {
-          this.isHideLoading = false;
-          this.lembreteService.getLembretesConteudo(value).subscribe({
-            next: (res) => {
-              if (res.length) {
-                this.semLembretes = true;
-              }
+    this.conteudoInput.valueChanges.pipe(
+      debounceTime(300),
+      filter(
+        (valorDigitado) => valorDigitado.length >= 3 || !valorDigitado.length
+      ),
+      distinctUntilChanged(),
+      switchMap((valorDigitado) => {
+        if (!valorDigitado.trim().length) {
+          return this.lembreteService.getLembretes().pipe(
+            map((res) => {
               this.lembretes = res;
-              this.isHideLoading = true;
-            },
-            error: (err) => {
-              this.isHideLoading = true;
-            },
-          });
-        }, 300);
-      } else if (!value.length) {
-        this.isHideLoading = false;
-        this.lembreteService.getLembretes().subscribe({
-          next: (res) => {
+              return res;
+            }),
+          );
+        }
+
+        return this.lembreteService.getLembretesConteudo(valorDigitado).pipe(
+          map((res) => {
             this.lembretes = res;
-            this.semLembretes = false;
-            this.isHideLoading = true;
-          },
-          error: (err) => {
-            this.isHideLoading = true;
-          },
-        });
-      }
-    });
+            return res;
+          }),
+        );
+      }),
+    ).subscribe();
   }
 
   openModal() {
@@ -102,6 +95,13 @@ export class LembreteComponent implements OnInit {
 
   salvarLembrete() {
     let form = this.formCriar.form;
+    let titulo = form.value.titulo.trim().length;
+    let conteudo = form.value.conteudo.trim().length;
+
+    if (!titulo || !conteudo) {
+      this.poNotification.error('Verifique se o Título ou Conteúdo estão preenchidos corretamente!');
+      return;
+    }
 
     if (form.valid) {
       this.isHideLoading = false;
@@ -133,6 +133,14 @@ export class LembreteComponent implements OnInit {
 
   atualizarLembrete() {
     let form = this.formEditar.form;
+
+    let titulo = form.value.titulo.trim().length;
+    let conteudo = form.value.conteudo.trim().length;
+
+    if (!titulo || !conteudo) {
+      this.poNotification.error('Verifique se o Título ou Conteúdo estão preenchidos corretamente!', );
+      return;
+    }
 
     if (form.valid) {
       this.lembrete = form.value;

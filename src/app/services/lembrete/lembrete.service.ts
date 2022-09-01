@@ -16,7 +16,7 @@ export class LembreteService {
 
   getLembretes(page:number = 1): Observable<Lembretes> {
     return this.httpClient
-      .get<Lembretes>(this.url+'?_page='+page+'&_limit=10&_sort=id&_order=desc')
+      .get<Lembretes>(this.url+'?_page='+page+'&_sort=id&_order=desc')
       .pipe(
         map((res) => {
           res.map((item) => {
@@ -99,6 +99,7 @@ export class LembreteService {
         label: 'Conteúdo',
         gridColumns: 12,
         gridSmColumns: 12,
+        maxLength: 100,
         rows: 5,
         placeholder: '',
       },
